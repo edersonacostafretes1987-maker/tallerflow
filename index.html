@@ -144,15 +144,41 @@ function sendWhatsApp(id){
   if(phone.startsWith('0')) phone='595'+phone.slice(1);
 
   const amount=money(o);
+  const equipo=device(o);
+  const estado=o.estado||'Sin estado';
+
+  let textoEstado='';
+
+  if(estado==='Recibido'){
+    textoEstado='Recibimos tu equipo y ya se encuentra registrado en nuestro taller.';
+  }else if(estado==='Diagnóstico'){
+    textoEstado='Tu equipo se encuentra actualmente en diagnóstico técnico.';
+  }else if(estado==='Esperando aprobación'){
+    textoEstado=`Finalizamos el diagnóstico de tu equipo.
+
+Diagnóstico: ${o.diagnostico||'Pendiente'}
+Presupuesto: ${amount}
+
+Quedamos aguardando tu aprobación para continuar.`;
+  }else if(estado==='En reparación'){
+    textoEstado='Tu presupuesto fue aprobado y tu equipo ya se encuentra en reparación.';
+  }else if(estado==='Listo'){
+    textoEstado='¡Buenas noticias! Tu equipo ya está listo para retirar.';
+  }else if(estado==='Entregado'){
+    textoEstado='Tu equipo figura como entregado. Muchas gracias por confiar en nosotros.';
+  }else{
+    textoEstado=`Estado actual de tu equipo: ${estado}.`;
+  }
+
   const msg=`Hola ${o.cliente_nombre} 👋
 
 Te contactamos de Play Asistencia Técnica.
 
-Equipo: ${device(o)}
-Estado: ${o.estado||'Sin estado'}
-Presupuesto: ${amount}
+Equipo: ${equipo}
 
-Quedamos atentos.`;
+${textoEstado}
+
+Play Asistencia Técnica`;
 
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
 }
