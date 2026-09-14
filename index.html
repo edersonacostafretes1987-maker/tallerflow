@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TallerFlow V2 · Play Asistencia Técnica</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#152033;--muted:#6b778d;--line:#e3e8f0;--brand:#0d6efd;--brand2:#0b5ed7;--dark:#0f172a;--ok:#15803d;--warn:#b45309;--danger:#b91c1c;--shadow:0 10px 30px rgba(23,32,51,.08)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.hidden{display:none!important}.muted{color:var(--muted)}
+button{border:0;border-radius:10px;padding:10px 14px;font-weight:750;cursor:pointer;font:inherit}.primary{background:var(--brand);color:#fff}.primary:hover{background:var(--brand2)}.secondary{background:#e9eef7;color:var(--text)}.danger{background:#fee2e2;color:#991b1b}.success{background:#dcfce7;color:#166534}
+input,select,textarea{width:100%;border:1px solid #d8dfeb;border-radius:10px;padding:11px 12px;background:#fff;color:var(--text);font:inherit}textarea{min-height:90px;resize:vertical}label{display:block;font-size:13px;font-weight:750;margin-bottom:6px}
+.auth-wrap{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#0f172a,#1e3a8a)}.auth-card{width:min(460px,100%);background:white;border-radius:20px;padding:26px;box-shadow:0 25px 60px rgba(0,0,0,.28)}.logo{font-size:28px;font-weight:900}.auth-card h1{margin:4px 0 6px}.auth-card .field{margin-top:14px}.auth-card .actions{margin-top:18px;display:grid;gap:10px}.note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:12px}.setup-box{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:16px}
+header{background:var(--dark);color:#fff;padding:16px 20px;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.12)}.top{max-width:1220px;margin:auto;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.brand{font-size:20px;font-weight:900}.brand small{display:block;color:#aeb8cc;font-size:12px;font-weight:500;margin-top:2px}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav button{background:#1e293b;color:#fff}.nav button:hover{background:#334155}.user-chip{font-size:12px;color:#cbd5e1;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+main{max-width:1220px;margin:24px auto;padding:0 16px}.section{display:none}.section.active{display:block}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}.toolbar h1{margin:0}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.metric h3{font-size:30px;margin:0}.metric p{margin:5px 0 0;color:var(--muted);font-size:13px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.span2{grid-column:span 2}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}th{font-size:12px;text-transform:uppercase;color:#556177}.badge{display:inline-flex;padding:6px 9px;border-radius:999px;font-size:12px;font-weight:800}.b-blue{background:#dbeafe;color:#1d4ed8}.b-yellow{background:#fef3c7;color:#92400e}.b-purple{background:#ede9fe;color:#6d28d9}.b-green{background:#dcfce7;color:#166534}.b-gray{background:#e5e7eb;color:#374151}.empty{text-align:center;color:var(--muted);padding:32px}.loader{text-align:center;padding:24px;color:var(--muted)}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:99;max-width:360px}.toast.err{background:#991b1b}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.65);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}.modal.open{display:flex}.modal-card{width:min(650px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:20px}.modal-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.close{width:36px;height:36px;border-radius:50%;background:#eef2f7}.kv{display:grid;grid-template-columns:160px 1fr;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line)}.kv:last-child{border:0}.price{font-size:30px;font-weight:900;color:#0f766e}
+@media(max-width:900px){.metrics{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.span2{grid-column:auto}table{display:block;overflow-x:auto;white-space:nowrap}}@media(max-width:520px){.metrics{grid-template-columns:1fr}.kv{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="setupView" class="auth-wrap hidden">
+  <div class="auth-card">
+    <div class="logo">TallerFlow</div>
+    <h1>Conectar Supabase</h1>
+    <p class="muted">Configuración inicial de esta instalación.</p>
+    <div class="setup-box">
+      <div class="field"><label>Project URL</label><input id="setupUrl" value="https://tzzgxkqmwbqdxyqperpg.supabase.co" /></div>
+      <div class="field"><label>Publishable Key</label><input id="setupKey" type="password" placeholder="Pegá aquí la Publishable Key" /></div>
+      <div class="actions"><button class="primary" onclick="saveConfig()">Guardar conexión</button></div>
+    </div>
+    <div class="note">La Publishable Key de Supabase está diseñada para usarse en aplicaciones cliente. No pegues aquí la contraseña de la base de datos ni una <b>service_role</b> key.</div>
+  </div>
+</div>
+
+<div id="loginView" class="auth-wrap hidden">
+  <form id="loginForm" class="auth-card">
+    <div class="logo">TallerFlow</div>
+    <h1>Iniciar sesión</h1>
+    <p class="muted">Play Asistencia Técnica</p>
+    <div class="field"><label>Correo</label><input id="email" type="email" required autocomplete="username" /></div>
+    <div class="field"><label>Contraseña</label><input id="password" type="password" required autocomplete="current-password" /></div>
+    <div class="actions"><button class="primary" type="submit">Entrar</button><button class="secondary" type="button" onclick="resetConfig()">Cambiar conexión Supabase</button></div>
+    <div class="note">Usá el usuario que acabás de crear en Supabase Authentication.</div>
+  </form>
+</div>
+
+<div id="appView" class="hidden">
+<header><div class="top">
+  <div class="brand">TallerFlow <small>Play Asistencia Técnica · V2 Supabase</small></div>
+  <div class="nav"><button onclick="showSection('dashboard')">Inicio</button><button onclick="showSection('new')">Nueva orden</button><button onclick="showSection('orders')">Órdenes</button><button onclick="logout()">Salir</button></div>
+  <div id="userEmail" class="user-chip"></div>
+</div></header>
+<main>
+<section id="dashboard" class="section active">
+  <div class="toolbar"><div><h1>Panel</h1><div class="muted">Datos reales guardados en Supabase</div></div><button class="primary" onclick="showSection('new')">+ Nueva orden</button></div>
+  <div id="metrics" class="metrics"></div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">Últimas órdenes</h3><div id="recent"></div></div>
+</section>
+<section id="new" class="section">
+  <div class="toolbar"><div><h1>Nueva orden</h1><div class="muted">Registrá un equipo directamente en Supabase.</div></div></div>
+  <form id="orderForm" class="card">
+    <div class="form-grid">
+      <div><label>Cliente *</label><input name="cliente_nombre" required placeholder="Ej.: Juan Rodríguez" /></div>
+      <div><label>WhatsApp *</label><input name="cliente_whatsapp" required placeholder="Ej.: +595 981 000000" /></div>
+      <div><label>Equipo *</label><input name="equipo" required placeholder="Ej.: Celular / Notebook" /></div>
+      <div><label>Marca</label><input name="marca" placeholder="Ej.: Samsung" /></div>
+      <div><label>Modelo</label><input name="modelo" placeholder="Ej.: Galaxy A54" /></div>
+      <div><label>IMEI / Serie</label><input name="imei" placeholder="Opcional" /></div>
+      <div class="span2"><label>Problema informado *</label><textarea name="problema" required placeholder="Ej.: no enciende, pantalla rota..."></textarea></div>
+      <div class="span2"><label>Diagnóstico</label><textarea name="diagnostico" placeholder="Puede completarse después"></textarea></div>
+      <div><label>Presupuesto</label><input name="presupuesto" type="number" min="0" step="1" /></div>
+      <div><label>Moneda</label><select name="moneda"><option>Gs.</option><option>R$</option><option>US$</option></select></div>
+      <div><label>Estado</label><select name="estado"><option>Recibido</option><option>Diagnóstico</option><option>Esperando aprobación</option><option>En reparación</option><option>Listo</option><option>Entregado</option></select></div>
+      <div><label>Aprobación</label><select name="aprobacion"><option value="Pendiente">Pendiente</option><option value="Aprobado">Aprobado</option><option value="Rechazado">Rechazado</option></select></div>
+      <div><label>Fecha estimada</label><input name="fecha_estimada" type="date" /></div>
+    </div>
+    <div class="actions"><button class="primary" type="submit">Guardar orden</button><button class="secondary" type="reset">Limpiar</button></div>
+  </form>
+</section>
+<section id="orders" class="section">
+  <div class="toolbar"><div><h1>Órdenes</h1><div class="muted">Consulta y actualiza reparaciones.</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="search" placeholder="Buscar cliente, equipo o #orden" style="min-width:250px"><select id="filter" style="min-width:190px"><option value="">Todos los estados</option><option>Recibido</option><option>Diagnóstico</option><option>Esperando aprobación</option><option>En reparación</option><option>Listo</option><option>Entregado</option></select></div></div>
+  <div class="card"><div id="ordersTable"></div></div>
+</section>
+</main>
+</div>
+
+<div id="detailModal" class="modal" onclick="if(event.target.id==='detailModal')closeModal()"><div class="modal-card"><div class="modal-head"><div><strong>Detalle de la orden</strong><div class="muted" style="font-size:12px">Información interna del taller</div></div><button class="close" onclick="closeModal()">✕</button></div><div id="detailBody"></div></div></div>
+<div id="editModal" class="modal" onclick="if(event.target.id==='editModal')closeEdit()"><div class="modal-card"><div class="modal-head"><div><strong>Editar orden</strong><div id="editOrderNumber" class="muted" style="font-size:12px"></div></div><button class="close" onclick="closeEdit()">✕</button></div><form id="editForm" style="margin-top:14px"><input type="hidden" name="id"><div class="form-grid"><div><label>Cliente *</label><input name="cliente_nombre" required></div><div><label>WhatsApp *</label><input name="cliente_whatsapp" required></div><div><label>Equipo *</label><input name="equipo" required></div><div><label>Marca</label><input name="marca"></div><div><label>Modelo</label><input name="modelo"></div><div><label>IMEI / Serie</label><input name="imei"></div><div class="span2"><label>Problema informado *</label><textarea name="problema" required></textarea></div><div class="span2"><label>Diagnóstico</label><textarea name="diagnostico"></textarea></div><div><label>Presupuesto</label><input name="presupuesto" type="number" min="0" step="1"></div><div><label>Moneda</label><select name="moneda"><option>Gs.</option><option>R$</option><option>US$</option></select></div><div><label>Estado</label><select name="estado"><option>Recibido</option><option>Diagnóstico</option><option>Esperando aprobación</option><option>En reparación</option><option>Listo</option><option>Entregado</option></select></div><div><label>Aprobación</label><select name="aprobacion"><option value="Pendiente">Pendiente</option><option value="Aprobado">Aprobado</option><option value="Rechazado">Rechazado</option></select></div><div><label>Fecha estimada</label><input name="fecha_estimada" type="date"></div></div><div class="actions"><button class="primary" type="submit">Guardar cambios</button><button class="secondary" type="button" onclick="closeEdit()">Cancelar</button></div></form></div></div>
+<div id="toast" class="toast hidden"></div>
+<script>
+const CONFIG_KEY='tallerflow_supabase_config_v2';
+const DEFAULT_URL='https://tzzgxkqmwbqdxyqperpg.supabase.co';
+let sb=null, orders=[], session=null;
+const statuses=['Recibido','Diagnóstico','Esperando aprobación','En reparación','Listo','Entregado'];
+
+function getConfig(){try{return JSON.parse(localStorage.getItem(CONFIG_KEY)||'null')}catch{return null}}
+function saveConfig(){const url=document.getElementById('setupUrl').value.trim();const key=document.getElementById('setupKey').value.trim();if(!url||!key)return toast('Falta Project URL o Publishable Key',true);if(key.includes('NEXT_PUBLIC_')||key.includes('\n')||key.includes('='))return toast('Pegá solamente el valor de la Publishable Key, que empieza con sb_publishable_',true);if(!key.startsWith('sb_publishable_'))return toast('La clave no parece una Publishable Key válida',true);localStorage.setItem(CONFIG_KEY,JSON.stringify({url,key}));location.reload()}
+function resetConfig(){if(confirm('¿Cambiar la conexión de Supabase en este navegador?')){localStorage.removeItem(CONFIG_KEY);location.reload()}}
+function initClient(){const c=getConfig();if(!c?.url||!c?.key)return false;try{sb=window.supabase.createClient(c.url,c.key);return true}catch(e){toast('No se pudo iniciar Supabase: '+e.message,true);return false}}
+function toast(msg,err=false){const el=document.getElementById('toast');el.textContent=msg;el.className='toast'+(err?' err':'');setTimeout(()=>el.classList.add('hidden'),3500)}
+function show(el){['setupView','loginView','appView'].forEach(id=>document.getElementById(id).classList.add('hidden'));document.getElementById(el).classList.remove('hidden')}
+
+async function bootstrap(){if(!initClient()){document.getElementById('setupUrl').value=DEFAULT_URL;show('setupView');return}const {data:{session:s}}=await sb.auth.getSession();session=s;if(!session){show('loginView');return}await enterApp()}
+async function enterApp(){show('appView');document.getElementById('userEmail').textContent=session?.user?.email||'';await loadOrders();renderDashboard();renderOrders()}
+async function logout(){await sb.auth.signOut();session=null;orders=[];show('loginView')}
+
+document.getElementById('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('password').value;
+  const btn=e.submitter || document.querySelector('#loginForm button[type=\"submit\"]');
+  try{
+    if(btn){btn.disabled=true;btn.textContent='Entrando...'}
+    if(!sb) throw new Error('Supabase no está inicializado');
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error) throw error;
+    if(!data?.session) throw new Error('Supabase no devolvió una sesión');
+    session=data.session;
+    await enterApp();
+  }catch(err){
+    console.error('Login error:',err);
+    toast('No se pudo iniciar sesión: '+(err?.message||String(err)),true);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Entrar'}
+  }
+});
+
+async function loadOrders(){document.getElementById('ordersTable').innerHTML='<div class="loader">Cargando órdenes...</div>';const {data,error}=await sb.from('ordenes').select('*').order('id',{ascending:false});if(error){toast('Error al leer órdenes: '+error.message,true);orders=[];return}orders=data||[]}
+function showSection(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='dashboard')renderDashboard();if(id==='orders')renderOrders();window.scrollTo({top:0,behavior:'smooth'})}
+function esc(v=''){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function money(o){if(o.presupuesto===null||o.presupuesto===''||Number(o.presupuesto)===0)return 'Sin definir';return `${o.moneda||''} ${Number(o.presupuesto).toLocaleString('es-PY')}`}
+function badge(s){const m={'Recibido':'b-blue','Diagnóstico':'b-purple','Esperando aprobación':'b-yellow','En reparación':'b-purple','Listo':'b-green','Entregado':'b-gray'};return `<span class="badge ${m[s]||'b-gray'}">${esc(s||'Sin estado')}</span>`}
+function device(o){return [o.marca,o.modelo].filter(Boolean).join(' ')||o.equipo||'Equipo'}
+function renderDashboard(){const counts=Object.fromEntries(statuses.map(s=>[s,orders.filter(o=>o.estado===s).length]));const open=orders.filter(o=>o.estado!=='Entregado').length;document.getElementById('metrics').innerHTML=`<div class="card metric"><h3>${orders.length}</h3><p>Órdenes totales</p></div><div class="card metric"><h3>${open}</h3><p>Órdenes abiertas</p></div><div class="card metric"><h3>${counts['Esperando aprobación']||0}</h3><p>Esperando aprobación</p></div><div class="card metric"><h3>${counts['Listo']||0}</h3><p>Listas para retirar</p></div>`;const recent=orders.slice(0,5);document.getElementById('recent').innerHTML=recent.length?`<table><thead><tr><th>#</th><th>Cliente</th><th>Equipo</th><th>Estado</th></tr></thead><tbody>${recent.map(o=>`<tr><td>#${String(o.id).padStart(4,'0')}</td><td>${esc(o.cliente_nombre)}</td><td>${esc(device(o))}</td><td>${badge(o.estado)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">Todavía no hay órdenes.</div>'}
+function renderOrders(){const q=(document.getElementById('search').value||'').toLowerCase();const f=document.getElementById('filter').value;const list=orders.filter(o=>(!f||o.estado===f)&&(!q||[o.id,o.cliente_nombre,o.cliente_whatsapp,o.equipo,o.marca,o.modelo,o.imei].join(' ').toLowerCase().includes(q)));document.getElementById('ordersTable').innerHTML=list.length?`<table><thead><tr><th>Orden</th><th>Cliente</th><th>Equipo</th><th>Presupuesto</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${list.map(o=>`<tr><td>#${String(o.id).padStart(4,'0')}</td><td><strong>${esc(o.cliente_nombre)}</strong><br><span class="muted">${esc(o.cliente_whatsapp)}</span></td><td>${esc(device(o))}</td><td>${esc(money(o))}</td><td><select onchange="changeStatus(${o.id},this.value)">${statuses.map(s=>`<option ${s===o.estado?'selected':''}>${s}</option>`).join('')}</select></td><td><button class="secondary" onclick="openDetail(${o.id})">Ver</button></td></tr>`).join('')}</tbody></table>`:'<div class="empty">No se encontraron órdenes.</div>'}
+async function changeStatus(id,status){const {error}=await sb.from('ordenes').update({estado:status}).eq('id',id);if(error)return toast('No se pudo actualizar: '+error.message,true);const o=orders.find(x=>x.id===id);if(o)o.estado=status;renderDashboard();renderOrders();toast('Estado actualizado')}
+function openDetail(id){const o=orders.find(x=>x.id===id);if(!o)return;document.getElementById('detailBody').innerHTML=`<div style="margin-top:14px" class="card"><div class="muted">Orden #${String(o.id).padStart(4,'0')}</div><h2 style="margin:6px 0">${esc(device(o))}</h2><div style="margin-bottom:12px">${badge(o.estado)}</div><div class="kv"><strong>Cliente</strong><span>${esc(o.cliente_nombre)}</span></div><div class="kv"><strong>WhatsApp</strong><span>${esc(o.cliente_whatsapp)}</span></div><div class="kv"><strong>Equipo</strong><span>${esc(o.equipo)}</span></div><div class="kv"><strong>Marca</strong><span>${esc(o.marca||'—')}</span></div><div class="kv"><strong>Modelo</strong><span>${esc(o.modelo||'—')}</span></div><div class="kv"><strong>IMEI / Serie</strong><span>${esc(o.imei||'—')}</span></div><div class="kv"><strong>Problema</strong><span>${esc(o.problema)}</span></div><div class="kv"><strong>Diagnóstico</strong><span>${esc(o.diagnostico||'Pendiente')}</span></div><div class="kv"><strong>Aprobación</strong><span>${esc(o.aprobacion||'Pendiente')}</span></div><div class="kv"><strong>Fecha estimada</strong><span>${esc(o.fecha_estimada||'—')}</span></div><div style="margin-top:18px"><div class="muted">Presupuesto</div><div class="price">${esc(money(o))}</div></div><div class="actions"><button class="primary" onclick="openEdit(${o.id})">✏️ Editar</button><button class="success" onclick="setApproval(${o.id},'Aprobado')">Aprobar</button><button class="danger" onclick="setApproval(${o.id},'Rechazado')">Rechazar</button></div></div>`;document.getElementById('detailModal').classList.add('open')}
+function openEdit(id){const o=orders.find(x=>x.id===id);if(!o)return;closeModal();const f=document.getElementById('editForm');['id','cliente_nombre','cliente_whatsapp','equipo','marca','modelo','imei','problema','diagnostico','presupuesto','moneda','estado','aprobacion','fecha_estimada'].forEach(k=>{if(f.elements[k])f.elements[k].value=o[k]??''});f.elements.aprobacion.value=o.aprobacion||'Pendiente';f.elements.moneda.value=o.moneda||'Gs.';f.elements.estado.value=o.estado||'Recibido';document.getElementById('editOrderNumber').textContent='Orden #'+String(o.id).padStart(4,'0');document.getElementById('editModal').classList.add('open')}
+function closeEdit(){document.getElementById('editModal').classList.remove('open')}
+
+async function setApproval(id,val){const patch={aprobacion:val};if(val==='Aprobado')patch.estado='En reparación';const {error}=await sb.from('ordenes').update(patch).eq('id',id);if(error)return toast('No se pudo actualizar: '+error.message,true);const o=orders.find(x=>x.id===id);Object.assign(o,patch);openDetail(id);renderDashboard();renderOrders();toast('Aprobación actualizada')}
+function closeModal(){document.getElementById('detailModal').classList.remove('open')}
+
+document.getElementById('orderForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.target);const row=Object.fromEntries(fd.entries());row.presupuesto=row.presupuesto?Number(row.presupuesto):null;if(!row.fecha_estimada)row.fecha_estimada=null;const btn=e.submitter;btn.disabled=true;btn.textContent='Guardando...';const {data,error}=await sb.from('ordenes').insert(row).select().single();btn.disabled=false;btn.textContent='Guardar orden';if(error)return toast('No se pudo guardar: '+error.message,true);orders.unshift(data);e.target.reset();renderDashboard();renderOrders();toast(`Orden #${String(data.id).padStart(4,'0')} creada`);showSection('orders')});
+
+document.getElementById('editForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.target);const row=Object.fromEntries(fd.entries());const id=Number(row.id);delete row.id;row.presupuesto=row.presupuesto?Number(row.presupuesto):null;if(!row.fecha_estimada)row.fecha_estimada=null;const btn=e.submitter;btn.disabled=true;btn.textContent='Guardando...';const {data,error}=await sb.from('ordenes').update(row).eq('id',id).select().single();btn.disabled=false;btn.textContent='Guardar cambios';if(error)return toast('No se pudieron guardar los cambios: '+error.message,true);const i=orders.findIndex(x=>x.id===id);if(i>=0)orders[i]=data;closeEdit();renderDashboard();renderOrders();openDetail(id);toast(`Orden #${String(id).padStart(4,'0')} actualizada`)});
+document.getElementById('search').addEventListener('input',renderOrders);document.getElementById('filter').addEventListener('change',renderOrders);
+bootstrap();
+</script>
+</body>
+</html>
