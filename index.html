@@ -150,22 +150,40 @@ function sendWhatsApp(id){
   let textoEstado='';
 
   if(estado==='Recibido'){
-    textoEstado='Recibimos tu equipo y ya se encuentra registrado en nuestro taller.';
+    textoEstado=textoEstado=`Recibimos tu equipo correctamente y ya se encuentra registrado en nuestro taller.
+
+Te mantendremos informado sobre el avance del servicio.`;
   }else if(estado==='Diagnóstico'){
-    textoEstado='Tu equipo se encuentra actualmente en diagnóstico técnico.';
+   textoEstado=`Tu equipo se encuentra actualmente en diagnóstico técnico.
+
+Estamos realizando las verificaciones necesarias para determinar la falla. Te informaremos cuando tengamos el diagnóstico y presupuesto disponibles.`;
   }else if(estado==='Esperando aprobación'){
-    textoEstado=`Finalizamos el diagnóstico de tu equipo.
+   textoEstado=`Finalizamos el diagnóstico de tu equipo.
 
 Diagnóstico: ${o.diagnostico||'Pendiente'}
 Presupuesto: ${amount}
 
-Quedamos aguardando tu aprobación para continuar.`;
+Quedamos aguardando tu aprobación para iniciar la reparación.
+
+Por favor, respondé este mensaje indicando si aprobás el presupuesto.`;
   }else if(estado==='En reparación'){
-    textoEstado='Tu presupuesto fue aprobado y tu equipo ya se encuentra en reparación.';
+    textoEstado=`Tu presupuesto fue aprobado correctamente.
+
+Ya iniciamos la reparación de tu equipo y nuestro equipo técnico se encuentra trabajando en el servicio.
+
+Te avisaremos apenas esté listo para retirar.`;
   }else if(estado==='Listo'){
-    textoEstado='¡Buenas noticias! Tu equipo ya está listo para retirar.';
+   textoEstado=`¡Buenas noticias! Tu equipo ya está listo para retirar.
+
+Podés pasar por Play Asistencia Técnica a retirar tu equipo.
+
+Gracias por confiar en nosotros.`;
   }else if(estado==='Entregado'){
-    textoEstado='Tu equipo figura como entregado. Muchas gracias por confiar en nosotros.';
+   textoEstado=`Tu equipo fue entregado correctamente.
+
+Muchas gracias por confiar en Play Asistencia Técnica.
+
+Esperamos poder ayudarte nuevamente cuando lo necesites.`;
   }else{
     textoEstado=`Estado actual de tu equipo: ${estado}.`;
   }
